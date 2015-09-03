@@ -16,7 +16,6 @@ library(RColorBrewer)
 source('func.R')
 
 ## Read in TCGA data
-# note: there are no matched normal samples for OV in TCGA
 datTumor <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1536837_06_01_15_TCGA_24.tumor_Rsubread_FeatureCounts.txt.gz', 'BRCA', 'tumor')
 datNormal <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1697009_06_01_15_TCGA_24.normal_Rsubread_FeatureCounts.txt.gz', 'BRCA', 'normal')
 
@@ -29,19 +28,18 @@ datGTEX <- readGTEX('Breast')
 
 # combine data
 commonHGNC <- intersect(rownames(datGTEX), rownames(datTumor))
-df <- cbind(datGTEX[commonHGNC,], datTumor[commonHGNC,])
-
+df <- cbind(datGTEX[commonHGNC,], datNormal[commonHGNC,], datTumor[commonHGNC,])
 
 # preprocess data
-colData <- data.frame(condition=factor(rep(c('NORMAL', 'TUMOR'),
-                                           c(dim(datGTEX)[2], dim(datTumor)[2])))
+colData <- data.frame(condition=factor(rep(c('NORMAL', 'MNORMAL', 'TUMOR'),
+                                           c(dim(datGTEX)[2], dim(datNormal)[2], dim(datTumor)[2])))
 )
 dds <- DESeqDataSetFromMatrix(df, colData, formula(~ condition))
 rownames(colData(dds)) <- colnames(df)
 
-workers <- 32
+workers <- 8
 register(MulticoreParam(workers))
-dds <- DESeq(dds, parallel=F)
+dds <- DESeq(dds, parallel=T)
 
 sfDESeq <- sizeFactors(dds) # save the size factors of the ref cohort
 loggeomeansRef <- rowMeans(log(df))
