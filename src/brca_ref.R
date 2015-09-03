@@ -50,6 +50,10 @@ reference <- list(reference_dds=dds,
                   reference_raw_count=df,
                   reference_sf=sfDESeq,
                   group=colData$condition)
+ref <- list(reference_raw_count=df,
+            reference_sf=sfDESeq,
+            group=colData$condition)
+
 
 save(reference, file='ref_data/DESeq_TCGA_GTEX_BRCA.Rdata')
 
