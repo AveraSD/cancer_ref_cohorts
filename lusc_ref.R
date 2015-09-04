@@ -1,4 +1,4 @@
-# BRCA Reference Cohort
+# LUSC Reference Cohort
 # original Author: Tobias Meissner
 
 rm(list=ls())
@@ -16,15 +16,15 @@ library(RColorBrewer)
 source('src/func.R')
 
 ## Read in TCGA data
-datTumor <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1536837_06_01_15_TCGA_24.tumor_Rsubread_FeatureCounts.txt.gz', 'BRCA', 'tumor')
-datNormal <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1697009_06_01_15_TCGA_24.normal_Rsubread_FeatureCounts.txt.gz', 'BRCA', 'normal')
+datTumor <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1536837_06_01_15_TCGA_24.tumor_Rsubread_FeatureCounts.txt.gz', 'LUSC', 'tumor')
+datNormal <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1697009_06_01_15_TCGA_24.normal_Rsubread_FeatureCounts.txt.gz', 'LUSC', 'normal')
 
 ## get clinical data
 clinical <- clinicalTCGA(colnames(datTumor))
 clinicalN <- clinicalTCGA(colnames(datNormal))
 
 ## read in GTEX normal samples
-datGTEX <- readGTEX('Breast')
+datGTEX <- readGTEX('Lung')
 
 # combine data
 commonHGNC <- intersect(rownames(datGTEX), rownames(datTumor))
@@ -44,16 +44,13 @@ dds <- DESeq(dds, parallel=T)
 sfDESeq <- sizeFactors(dds) # save the size factors of the ref cohort
 loggeomeansRef <- rowMeans(log(df))
 
-save(loggeomeansRef, file='ref_data/loggeoameansBRCA.Rdata')
+save(loggeomeansRef, file='ref_data/loggeoameansLUSC.Rdata')
 
 reference <- list(reference_dds=dds,
                   reference_raw_count=df,
                   reference_sf=sfDESeq,
                   group=colData$condition)
-ref <- list(reference_raw_count=df,
-            reference_sf=sfDESeq,
-            group=colData$condition)
 
+save(reference, file='ref_data/DESeq_TCGA_GTEX_LUSC.Rdata')
 
-save(reference, file='ref_data/DESeq_TCGA_GTEX_BRCA.Rdata')
 

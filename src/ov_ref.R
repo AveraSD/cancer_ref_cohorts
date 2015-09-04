@@ -13,7 +13,7 @@ library(EDASeq)
 library(RUVSeq)
 library(RColorBrewer)
 
-source('func.R')
+source('src/func.R')
 
 ## Read in TCGA data
 # note: there are no matched normal samples for OV in TCGA
