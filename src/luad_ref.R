@@ -27,7 +27,11 @@ clinicalN <- clinicalTCGA(colnames(datNormal))
 datGTEX <- readGTEX('Lung')
 
 # combine data
-commonHGNC <- intersect(rownames(datGTEX), rownames(datTumor))
+hg19syms <- read.csv2('/home/tobias/AWS/database/Homo_sapiens/UCSC/hg19/Annotation/Genes/geneid.txt', 
+                      header=F,
+                      stringsAsFactor=F)$V1
+
+commonHGNC <- intersect(intersect(rownames(datGTEX), rownames(datTumor)), hg19syms)
 df <- cbind(datGTEX[commonHGNC,], datNormal[commonHGNC,], datTumor[commonHGNC,])
 
 # preprocess data
@@ -43,12 +47,14 @@ dds <- DESeq(dds, parallel=T)
 
 sfDESeq <- sizeFactors(dds) # save the size factors of the ref cohort
 loggeomeansRef <- rowMeans(log(df))
+vsdRef <- varianceStabilizingTransformation(dds)
 
 save(loggeomeansRef, file='ref_data/loggeoameansLUAD.Rdata')
 
 reference <- list(reference_dds=dds,
                   reference_raw_count=df,
                   reference_sf=sfDESeq,
+                  reference_vsd=vsdRef,
                   group=colData$condition)
 
 save(reference, file='ref_data/DESeq_TCGA_GTEX_LUAD.Rdata')
