@@ -25,18 +25,33 @@ clinical <- clinicalTCGA(colnames(datTumor))
 ## read in GTEX normal samples
 datGTEX <- readGTEX('Ovary')
 
+## read in fallopian tube samples
+path <- '~/AWS/storage/fallopian_ref/featurecounts/'
+files <- dir(path)
+files <- files[-grep('summary', files)]
+files <- paste(path,files,sep='')
+
+df <- NULL
+for(i in files) {
+  x <- read.csv2(i, stringsAsFactors=F, sep='\t',skip=1)[,7]
+  df <- cbind(df,x)
+}
+colnames(df) <- sapply(strsplit(basename(files), split='_'), '[[', 1)
+rownames(df) <- read.csv2(i, stringsAsFactors=F, sep='\t',skip=1)$Geneid
+datFAL <- df
+
 # combine data
 hg19syms <- read.csv2('/home/tobias/AWS/database/Homo_sapiens/UCSC/hg19/Annotation/Genes/geneid.txt', 
                       header=F,
                       stringsAsFactor=F)$V1
 
 commonHGNC <- intersect(intersect(rownames(datGTEX), rownames(datTumor)), hg19syms)
-df <- cbind(datGTEX[commonHGNC,], datTumor[commonHGNC,])
+df <- cbind(datGTEX[commonHGNC,], datTumor[commonHGNC,], datFAL[commonHGNC,])
 
 
 # preprocess data
-colData <- data.frame(condition=factor(rep(c('NORMAL', 'TUMOR'),
-                                          c(dim(datGTEX)[2], dim(datTumor)[2])))
+colData <- data.frame(condition=factor(rep(c('NORMAL', 'TUMOR', 'FALLOPIAN'),
+                                          c(dim(datGTEX)[2], dim(datTumor)[2], dim(datFAL)[2])))
 )
 dds <- DESeqDataSetFromMatrix(df, colData, formula(~ condition))
 rownames(colData(dds)) <- colnames(df)
