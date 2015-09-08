@@ -21,10 +21,9 @@ datTumor <- readTCGA('/home/tobias/AWS/s3/averaprojects/tcga/GSM1536837_06_01_15
 
 ## get clinical data
 clinical <- clinicalTCGA(colnames(datTumor))
-clinicalN <- clinicalTCGA(colnames(datNormal))
 
 ## read in GTEX normal samples
-datGTEX <- readGTEX('Breast')
+datGTEX <- readGTEX('Ovary')
 
 # combine data
 hg19syms <- read.csv2('/home/tobias/AWS/database/Homo_sapiens/UCSC/hg19/Annotation/Genes/geneid.txt', 
